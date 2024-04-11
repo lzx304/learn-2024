@@ -1,0 +1,40 @@
+server:
+  port: 8086
+
+
+spring:
+  shardingsphere:
+    datasource:
+      names: ds1,ds2
+      ds1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ds1?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: root
+      ds2:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ds2?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: root
+    sharding:
+      tables:
+        t_goods:
+          actual-data-nodes: ds$->{1..2}.t_goods_$->{1..2}
+          table-strategy:
+            inline:
+              sharding-column: goods_id
+              algorithm-expression: t_goods_$->{goods_id % 2}
+          key-generator:
+            column: goods_id
+            type: SNOWFLAKE
+
+      default-database-strategy:
+        inline:
+          sharding-column: main_class
+          algorithm-expression: ds$->{main_class % 2 + 1}
+
+
+
+
